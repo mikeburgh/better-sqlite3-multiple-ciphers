@@ -4,37 +4,6 @@ run-name: Prebuild tests (${{ inputs.runtime }} [${{ inputs.targets }}])
 
 on:
   workflow_dispatch:
-    inputs:
-      runtime:
-        description: 'Prebuild runtime'
-        type: choice
-        required: true
-        default: node
-        options:
-          - node
-          - electron
-      targets:
-        description: 'Runtime versions (targets)'
-        required: true
-        default: -t 18.0.0
-      ubuntu-20.04:
-        description: 'Test on ubuntu-20.04'
-        type: boolean
-        default: true
-      windows-2019:
-        description: 'Test on windows-2019'
-        type: boolean
-        default: true
-      macos-13:
-        description: 'Test on macos-13'
-        type: boolean
-        default: true
-      alpine:
-        description: 'Test on Alpine-Linux'
-        type: boolean
-      arm:
-        description: 'Test on ARM(v7/64) architectures'
-        type: boolean
 
 env:
   TEST_COMMAND: npx --no-install prebuild -r ${{ inputs.runtime }} ${{ inputs.targets }} --include-regex 'better_sqlite3.node$'
