@@ -43,6 +43,14 @@ jobs:
           ${{ env.ELECTRON_BUILD_CMD }} --arch ia32
           ${{ env.ELECTRON_BUILD_CMD }} --arch arm64
 
+  prebuild-linux-x64:
+    name: Prebuild on Linux x64
+    runs-on: ubuntu-latest
+    container: node:18-bullseye
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install --ignore-scripts
+      - run: ${{ env.ELECTRON_BUILD_CMD }}
       
   prebuild-alpine-linux-electron:
     name: Prebuild on Alpine-Linux (x64) Electron
