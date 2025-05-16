@@ -5,7 +5,7 @@ on:
 
 env:
   NODE_BUILD_CMD: npx --no-install prebuild -r node -t 18.0.0 -t 20.0.0 -t 22.0.0 --include-regex 'better_sqlite3.node$' -u ${{ secrets.GITHUB_TOKEN }}
-  ELECTRON_BUILD_CMD: npx --no-install prebuild -r electron -t 35.0.0 -t 36.0.0 --include-regex 'better_sqlite3.node$' -u ${{ secrets.GITHUB_TOKEN }}
+  ELECTRON_BUILD_CMD: npx --no-install prebuild -r electron -t 26.0.0 -t 27.0.0 -t 28.0.0 -t 29.0.0 -t 30.0.0 -t 31.0.0 -t 32.0.0 -t 33.0.0 -t 34.0.0 -t 35.0.0 -t 36.0.0 --include-regex 'better_sqlite3.node$' -u ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   prebuild:
@@ -35,9 +35,11 @@ jobs:
           sudo apt install gcc-10 g++-10 -y
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /usr/bin/g++ g++ /usr/bin/g++-10 --slave /usr/bin/gcov gcov /usr/bin/gcov-10
       - run: npm install --ignore-scripts
+      - run: ${{ env.NODE_BUILD_CMD }}
       - run: ${{ env.ELECTRON_BUILD_CMD }}
       - if: matrix.os == 'windows-2019'
         run: |
+          ${{ env.NODE_BUILD_CMD }} --arch ia32
           npx --no-install prebuild -r node -t 20.0.0 -t 22.0.0 --include-regex 'better_sqlite3.node$' --arch arm64 -u ${{ secrets.GITHUB_TOKEN }}
           ${{ env.ELECTRON_BUILD_CMD }} --arch ia32
           ${{ env.ELECTRON_BUILD_CMD }} --arch arm64
@@ -49,7 +51,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: npm install --ignore-scripts
+      - run: ${{ env.NODE_BUILD_CMD }}
       - run: ${{ env.ELECTRON_BUILD_CMD }}
+
+  prebuild-alpine-linux-node:
+    name: Prebuild on Alpine-Linux (x64) Node
+    runs-on: ubuntu-latest
+    container: node:18-alpine
+    steps:
+      - uses: actions/checkout@v4
+      - run: apk add build-base git python3 py3-setuptools --update-cache
+      - run: npm install --ignore-scripts
+      - run: ${{ env.NODE_BUILD_CMD }}
+
       
   prebuild-alpine-linux-electron:
     name: Prebuild on Alpine-Linux (x64) Electron
@@ -60,6 +74,19 @@ jobs:
       - run: apk add build-base git python3 py3-setuptools --update-cache
       - run: npm install --ignore-scripts
       - run: ${{ env.ELECTRON_BUILD_CMD }}
+
+  prebuild-alpine-linux-arm64-node:
+    name: Prebuild on Alpine-Linux (arm64) Node
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - run: |
+          docker run --rm -v $(pwd):/tmp/project --entrypoint /bin/sh --platform linux/arm64 node:18-alpine -c "\
+          apk add build-base git python3 py3-setuptools --update-cache && \
+          cd /tmp/project && \
+          npm install --ignore-scripts && \
+          ${{ env.NODE_BUILD_CMD }}"
   
   prebuild-alpine-linux-arm64-electron:
     name: Prebuild on Alpine-Linux (arm64) Electron
@@ -73,6 +100,24 @@ jobs:
           cd /tmp/project && \
           npm install --ignore-scripts && \
           ${{ env.ELECTRON_BUILD_CMD }}"
+
+  prebuild-linux-arm-node:
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - arm/v7
+          - arm64
+    name: Prebuild on Linux (${{ matrix.arch }}) Node
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - run: |
+          docker run --rm -v $(pwd):/tmp/project --entrypoint /bin/sh --platform linux/${{ matrix.arch }} node:18-bullseye -c "\
+          cd /tmp/project && \
+          npm install --ignore-scripts && \
+          ${{ env.NODE_BUILD_CMD }}"
 
   prebuild-linux-arm-electron:
     strategy:
