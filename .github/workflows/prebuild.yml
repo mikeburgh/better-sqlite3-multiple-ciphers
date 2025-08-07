@@ -35,7 +35,7 @@ jobs:
       - run: npm install --ignore-scripts
       - run: ${{ env.NODE_BUILD_CMD }}
       - run: ${{ env.ELECTRON_BUILD_CMD }}
-      - if: matrix.os == 'windows-2019'
+      - if: matrix.os == 'windows-2025'
         run: |
           ${{ env.NODE_BUILD_CMD }} --arch ia32
           npx --no-install prebuild -r node -t 20.0.0 -t 22.0.0 --include-regex 'better_sqlite3.node$' --arch arm64 -u ${{ secrets.GITHUB_TOKEN }}
