@@ -4,13 +4,44 @@ run-name: Prebuild tests (${{ inputs.runtime }} [${{ inputs.targets }}])
 
 on:
   workflow_dispatch:
+    inputs:
+      runtime:
+        description: 'Prebuild runtime'
+        type: choice
+        required: true
+        default: node
+        options:
+          - node
+          - electron
+      targets:
+        description: 'Runtime versions (targets)'
+        required: true
+        default: -t 18.0.0
+      ubuntu-22.04:
+        description: 'Test on ubuntu-22.04'
+        type: boolean
+        default: true
+      windows-2022:
+        description: 'Test on windows-2022'
+        type: boolean
+        default: true
+      macos-13:
+        description: 'Test on macos-13'
+        type: boolean
+        default: true
+      alpine:
+        description: 'Test on Alpine-Linux'
+        type: boolean
+      arm:
+        description: 'Test on ARM(v7/64) architectures'
+        type: boolean
 
 env:
   TEST_COMMAND: npx --no-install prebuild -r ${{ inputs.runtime }} ${{ inputs.targets }} --include-regex 'better_sqlite3.node$'
 
 jobs:
   input-setup:
-    if: inputs['ubuntu-20.04'] == true || inputs['windows-2019'] == true || inputs['macos-13'] == true
+    if: inputs['ubuntu-22.04'] == true || inputs['windows-2022'] == true || inputs['macos-13'] == true
     name: Preparing tests
     runs-on: ubuntu-latest
     outputs:
@@ -22,7 +53,7 @@ jobs:
           INPUTS='${{ toJSON(inputs) }}'
           PLATFORMS='{"os":[]}'
           
-          for os in 'ubuntu-20.04' 'windows-2019' 'macos-13'
+          for os in 'ubuntu-22.04' 'windows-2022' 'macos-13'
           do
             if [ "$(jq ".[\"$os\"]" <<< "$INPUTS")" = "true" ]; then PLATFORMS=$(jq -c ".os += [\"$os\"]" <<< "$PLATFORMS"); fi
           done
@@ -40,7 +71,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
       - if: ${{ startsWith(matrix.os, 'windows') }}
         run: pip.exe install setuptools
       - if: ${{ startsWith(matrix.os, 'macos') }}
@@ -54,7 +85,7 @@ jobs:
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /usr/bin/g++ g++ /usr/bin/g++-10 --slave /usr/bin/gcov gcov /usr/bin/gcov-10
       - run: npm install --ignore-scripts
       - run: ${{ env.TEST_COMMAND }}
-      - if: matrix.os == 'windows-2019' && inputs.arm == true
+      - if: matrix.os == 'windows-2022' && inputs.arm == true
         run: ${{ env.TEST_COMMAND }} --arch arm64
 
   prebuild-test-mac-arm64:
@@ -65,7 +96,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
       - run: brew install python-setuptools
       - run: npm install --ignore-scripts
       - run: ${{ env.TEST_COMMAND }}
@@ -74,7 +105,7 @@ jobs:
     if: inputs.alpine == true
     name: Testing prebuild on Alpine-Linux (x64)
     runs-on: ubuntu-latest
-    container: node:18-alpine
+    container: node:20-alpine
     steps:
       - uses: actions/checkout@v4
       - run: apk add build-base git python3 py3-setuptools --update-cache
@@ -89,14 +120,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: docker/setup-qemu-action@v3
       - run: |
-          docker run --rm -v $(pwd):/tmp/project --entrypoint /bin/sh --platform linux/arm64 node:18-alpine -c "\
+          docker run --rm -v $(pwd):/tmp/project --entrypoint /bin/sh --platform linux/arm64 node:20-alpine -c "\
           apk add build-base git python3 py3-setuptools --update-cache && \
           cd /tmp/project && \
           npm install --ignore-scripts && \
           ${{ env.TEST_COMMAND }}"
 
   prebuild-test-linux-arm:
-    if: inputs['ubuntu-20.04'] == true && inputs.arm == true
+    if: inputs['ubuntu-22.04'] == true && inputs.arm == true
     strategy:
       fail-fast: false
       matrix:
@@ -109,7 +140,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: docker/setup-qemu-action@v3
       - run: |
-          docker run --rm -v $(pwd):/tmp/project --entrypoint /bin/sh --platform linux/${{ matrix.arch }} node:18-bullseye -c "\
+          docker run --rm -v $(pwd):/tmp/project --entrypoint /bin/sh --platform linux/${{ matrix.arch }} node:20-bullseye -c "\
           cd /tmp/project && \
           npm install --ignore-scripts && \
           ${{ env.TEST_COMMAND }}"
