@@ -6,7 +6,7 @@
   "author": "Mahesh Bandara Wijerathna (m4heshd) <m4heshd@gmail.com>",
   "repository": {
     "type": "git",
-    "url": "git://github.com/m4heshd/better-sqlite3-multiple-ciphers.git"
+    "url": "git://github.com/mikeburgh/better-sqlite3-multiple-ciphers.git"
   },
   "main": "lib/index.js",
   "types": "index.d.ts",

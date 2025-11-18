@@ -7,8 +7,8 @@ permissions:
   contents: write
 
 env:
-  NODE_BUILD_CMD: npx --no-install prebuild -r node -t 18.0.0 -t 20.0.0 -t 22.0.0 -t 24.0.0 --include-regex 'better_sqlite3.node$'
-  ELECTRON_BUILD_CMD: npx --no-install prebuild -r electron -t 39.0.0 --include-regex 'better_sqlite3.node$'
+  NODE_BUILD_CMD: npx --no-install prebuild -r node -t 18.0.0 -t 20.0.0 -t 22.0.0 -t 24.0.0 --include-regex 'better_sqlite3.node$' -u ${{ secrets.GITHUB_TOKEN }}
+  ELECTRON_BUILD_CMD: npx --no-install prebuild -r electron -t 39.0.0 --include-regex 'better_sqlite3.node$' -u ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   prebuild:
@@ -43,7 +43,7 @@ jobs:
   prebuild-linux-x64:
     name: Prebuild on Linux x64
     runs-on: ubuntu-latest
-    container: node:20-bullseye
+    container: node:20-bookworm
     steps:
       - uses: actions/checkout@v4
       - run: npm install --ignore-scripts
