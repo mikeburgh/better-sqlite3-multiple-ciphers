@@ -28,12 +28,12 @@ jobs:
       - if: ${{ startsWith(matrix.os, 'macos') }}
         run: brew install python-setuptools
       - run: npm install --ignore-scripts
-      - run: ${{ env.NODE_BUILD_CMD }}
+      # - run: ${{ env.NODE_BUILD_CMD }}
       - run: ${{ env.ELECTRON_BUILD_CMD }}
       - if: matrix.os == 'windows-2025'
         run: |
-          ${{ env.NODE_BUILD_CMD }} --arch ia32
-          ${{ env.NODE_BUILD_CMD }} --arch arm64
+          # ${{ env.NODE_BUILD_CMD }} --arch ia32
+          # ${{ env.NODE_BUILD_CMD }} --arch arm64
           ${{ env.ELECTRON_BUILD_CMD }} --arch ia32
           ${{ env.ELECTRON_BUILD_CMD }} --arch arm64
 
@@ -44,18 +44,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: npm install --ignore-scripts
-      - run: ${{ env.NODE_BUILD_CMD }}
+      # - run: ${{ env.NODE_BUILD_CMD }}
       - run: ${{ env.ELECTRON_BUILD_CMD }}
 
-  prebuild-alpine-linux-node:
-    name: Prebuild on Alpine-Linux (x64) Node
-    runs-on: ubuntu-latest
-    container: node:20-alpine
-    steps:
-      - uses: actions/checkout@v4
-      - run: apk add build-base git python3 py3-setuptools --update-cache
-      - run: npm install --ignore-scripts
-      - run: ${{ env.NODE_BUILD_CMD }}
+  # prebuild-alpine-linux-node:
+  #   name: Prebuild on Alpine-Linux (x64) Node
+  #   runs-on: ubuntu-latest
+  #   container: node:20-alpine
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - run: apk add build-base git python3 py3-setuptools --update-cache
+  #     - run: npm install --ignore-scripts
+  #     - run: ${{ env.NODE_BUILD_CMD }}
 
   prebuild-alpine-linux-electron:
     name: Prebuild on Alpine-Linux (x64) Electron
@@ -67,18 +67,18 @@ jobs:
       - run: npm install --ignore-scripts
       - run: ${{ env.ELECTRON_BUILD_CMD }}
 
-  prebuild-alpine-linux-arm64:
-    name: Prebuild on Alpine-Linux (arm64) Node
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: docker/setup-qemu-action@v3
-      - run: |
-          docker run --rm -v $(pwd):/tmp/project --entrypoint /bin/sh --platform linux/arm64 node:20-alpine -c "\
-          apk add build-base git python3 py3-setuptools --update-cache && \
-          cd /tmp/project && \
-          npm install --ignore-scripts && \
-          ${{ env.NODE_BUILD_CMD }}"
+  # prebuild-alpine-linux-arm64:
+  #   name: Prebuild on Alpine-Linux (arm64) Node
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: docker/setup-qemu-action@v3
+  #     - run: |
+  #         docker run --rm -v $(pwd):/tmp/project --entrypoint /bin/sh --platform linux/arm64 node:20-alpine -c "\
+  #         apk add build-base git python3 py3-setuptools --update-cache && \
+  #         cd /tmp/project && \
+  #         npm install --ignore-scripts && \
+  #         ${{ env.NODE_BUILD_CMD }}"
 
   prebuild-alpine-linux-arm64-electron:
     name: Prebuild on Alpine-Linux (arm64) Electron
@@ -93,21 +93,21 @@ jobs:
           npm install --ignore-scripts && \
           ${{ env.ELECTRON_BUILD_CMD }}"
 
-  prebuild-linux-arm:
-    strategy:
-      fail-fast: false
-      matrix:
-        arch:
-          - arm/v7
-          - arm64
-    name: Prebuild on Linux (${{ matrix.arch }})
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: docker/setup-qemu-action@v3
-      - run: |
-          docker run --rm -v $(pwd):/tmp/project --entrypoint /bin/sh --platform linux/${{ matrix.arch }} node:20-bullseye -c "\
-          cd /tmp/project && \
-          npm install --ignore-scripts && \
-          ${{ env.NODE_BUILD_CMD }} && \
-          if [ '${{ matrix.arch }}' = 'arm64' ]; then ${{ env.ELECTRON_BUILD_CMD }} --arch arm64; fi"
+  # prebuild-linux-arm:
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       arch:
+  #         - arm/v7
+  #         - arm64
+  #   name: Prebuild on Linux (${{ matrix.arch }})
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: docker/setup-qemu-action@v3
+  #     - run: |
+  #         docker run --rm -v $(pwd):/tmp/project --entrypoint /bin/sh --platform linux/${{ matrix.arch }} node:20-bullseye -c "\
+  #         cd /tmp/project && \
+  #         npm install --ignore-scripts && \
+  #         ${{ env.NODE_BUILD_CMD }} && \
+  #         if [ '${{ matrix.arch }}' = 'arm64' ]; then ${{ env.ELECTRON_BUILD_CMD }} --arch arm64; fi"
